@@ -24,19 +24,19 @@ class EKSConnectorMock(EKSConnector):
 class MyEKSCallback(EKSCallback):
 
     def did_insert_key(self):
-        print "did insert key"
+        print("did insert key")
 
     def did_remove_key(self):
-        print "did remove key"
+        print("did remove key")
 
     def did_read_key(self, data):
-        print "did read key: %s" % data
+        print("did read key: %s") % data
 
 callback = MyEKSCallback()
 eks = EKSConnector("127.0.0.1", 2444)
 
-print "single call: "
+print("single call: ")
 eks.read_key_state(callback)
 
-print "\npermanent call: "
+print("\npermanent call: ")
 eks.start_listening(callback)
