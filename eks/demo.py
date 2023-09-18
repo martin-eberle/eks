@@ -30,7 +30,7 @@ class MyEKSCallback(EKSCallback):
         print("did remove key")
 
     def did_read_key(self, data):
-        print("did read key: %s") % data
+        print("did read key: %s" % data)
 
 callback = MyEKSCallback()
 eks = EKSConnector("192.168.1.1", 2444)

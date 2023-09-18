@@ -1,4 +1,4 @@
-import socket, threading, time
+import socket, threading, time, codecs
 
 
 class EKSResponse:
@@ -46,10 +46,10 @@ class EKSConnector(object):
         length = 0
 
         while bytes_recd < msglen:
-            chunk = self.eks_socket.recv(1)
+            chunk = codecs.decode(self.eks_socket.recv(1), 'ASCII')
             if chunk == '':
                 raise RuntimeError("socket connection broken")
-            chunks.append(chunk.encode("hex"))
+            chunks.append(chunk)
 
             if bytes_recd == 0:
                 msglen = ord(chunk)
@@ -75,7 +75,9 @@ class EKSConnector(object):
         self.__handle_response(response, callback)
 
         if response.command == "Ek" and response.status == 1:
-            self.__send_to_socket("\x07TL\x01\x01\x73\x09")
+            # hex code for reading key payload: 07 54 4C 01 00 00 74 = 7 T L 1 0 0 t ?
+            byteCode = codecs.decode('07544C01000074', 'hex')
+            self.__send_to_socket(byteCode)
             response = self.__read_from_socket()    
             self.__handle_response(response, callback)
         

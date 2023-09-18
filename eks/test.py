@@ -1,6 +1,4 @@
-import socket
-import time
-import codecs
+import socket, time, codecs
 
 class Response:
     def __init__(self, status, payload):
