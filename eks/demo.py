@@ -33,7 +33,7 @@ class MyEKSCallback(EKSCallback):
         print("did read key: %s") % data
 
 callback = MyEKSCallback()
-eks = EKSConnector("127.0.0.1", 2444)
+eks = EKSConnector("192.168.1.1", 2444)
 
 print("single call: ")
 eks.read_key_state(callback)

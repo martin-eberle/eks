@@ -1,5 +1,6 @@
 import socket
 import time
+import codecs
 
 class Response:
     def __init__(self, status, payload):
@@ -11,7 +12,7 @@ class mysocket:
       - coded for clarity, not efficiency
     '''
 
-    def __init__(self, sock=None):
+    def __init__(self, sock = None):
         if sock is None:
             self.sock = socket.socket(
                 socket.AF_INET, socket.SOCK_STREAM)
@@ -25,6 +26,7 @@ class mysocket:
         self.sock.close()
 
     def mysend(self, msg):
+        print('Send command: ' + str(msg))
         bytes_sent = self.sock.send(msg)
         return bytes_sent
         # totalsent = 0
@@ -42,7 +44,7 @@ class mysocket:
         status = -1
 
         while bytes_recd < msglen:
-            chunk = self.sock.recv(1)
+            chunk = codecs.decode(self.sock.recv(1), 'ASCII')
             if chunk == '':
                 raise RuntimeError("socket connection broken")
             chunks.append(chunk)
@@ -57,8 +59,7 @@ class mysocket:
                 status = ord(chunk)
 
             bytes_recd = bytes_recd + len(chunk)
-            # print "(" + str(bytes_recd) + ") \t" + str(ord(chunk)) + "\t" + str(msglen)
-
+            print("(" + str(bytes_recd - 1) + ") \t" + str(ord(chunk)) + "\t" + str(msglen))
 
         # if bytes_recd > 3:
         # print command + "/" + str(status)
@@ -73,19 +74,25 @@ class mysocket:
         else:
             return Response(command, ''.join(chunks))
 
-
 mysock = mysocket()
-mysock.connect("127.0.0.1", 2444)
+mysock.connect("192.168.1.1", 2444)
 status = ''
+
 while True:
-    mysock.mysend("\x07Ek\x01\x00\x00\x00")
-    new_status = mysock.myreceive()
+    # hex code for reading key status: 07 45 6B 01 00 00 74 = 7 E k 1 0 0 0
+    byteCode = codecs.decode('07456B01000000', 'hex')
+    mysock.mysend(byteCode)
+    new_status = mysock.myreceive().status
+
     if new_status != status:
-        print 'new status'
+        print('old status:')
+        print(status)
+        print('new status:')
         status = new_status
-        print new_status
-        print status
+        print(status)
 
     if status == "EKS_KEY_IN":
-        mysock.mysend("\x07TL\x01\x00\x00\x74")
-        print mysock.myreceive()
+        # hex code for reading key payload: 07 54 4C 01 00 00 74 = 7 T L 1 0 0 t ?
+        byteCode = codecs.decode('07544C01000074', 'hex')
+        mysock.mysend(byteCode)
+        print(mysock.myreceive().payload)
